@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import engine, Base, SessionLocal
-import requests
+from executor import run_python, run_java
 from ai_service import get_hint, get_review, get_explanation
 
 import models
@@ -37,20 +37,16 @@ def get_questions(db: Session = Depends(get_db)):
 class RunRequest(BaseModel):
     code: str
     language: str
-    version: str
+    version: str = ""
 
 @app.post("/run")
 def run_code(req: RunRequest):
-    response = requests.post("http://localhost:2000/api/v2/execute", json={
-        "language": req.language,
-        "version": req.version,
-        "files": [{"content": req.code}]
-    })
-    result = response.json()
-    return {
-        "output": result.get("run", {}).get("output", ""),
-        "stderr": result.get("run", {}).get("stderr", "")
-    }
+    if req.language == "python":
+        return run_python(req.code)
+    elif req.language == "java":
+        return run_java(req.code)
+    else:
+        return {"output": "", "stderr": "Unsupported language"}
 class HintRequest(BaseModel):
     question_title: str
     question_description: str
