@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import './App.css';
 
+const API_URL = 'https://ai-coding-platform-backend.onrender.com';
+
 const LANGUAGE_VERSIONS = {
   python: '3.12.0',
   java: '15.0.2'
@@ -28,7 +30,7 @@ function App() {
   const [loadingExplain, setLoadingExplain] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8000/questions')
+    fetch(`${API_URL}/questions`)
       .then(res => res.json())
       .then(data => setQuestions(data))
       .catch(() => setQuestions([]));
@@ -46,7 +48,7 @@ function App() {
   const runCode = () => {
     setRunning(true);
     setOutput('Running...');
-    fetch('http://localhost:8000/run', {
+    fetch(`${API_URL}/run`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, language, version: LANGUAGE_VERSIONS[language] })
@@ -65,7 +67,7 @@ function App() {
   const getHint = () => {
     setLoadingHint(true);
     setHint('Thinking...');
-    fetch('http://localhost:8000/hint', {
+    fetch(`${API_URL}/hint`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -88,7 +90,7 @@ function App() {
   const getReview = () => {
     setLoadingReview(true);
     setReview('Reviewing...');
-    fetch('http://localhost:8000/review', {
+    fetch(`${API_URL}/review`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question_title: selected.title, code })
@@ -108,7 +110,7 @@ function App() {
     if (!question.trim()) return;
     setLoadingExplain(true);
     setExplanation('Thinking...');
-    fetch('http://localhost:8000/explain', {
+    fetch(`${API_URL}/explain`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question_title: selected.title, code, user_question: question })
